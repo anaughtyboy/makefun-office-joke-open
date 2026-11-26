@@ -18,6 +18,11 @@ function fail(message: string): never {
   throw new Error(`office-joke: ${message}`);
 }
 
+// Count characters as code points, not UTF-16 units: the
+// gate counts characters, and a character outside the BMP
+// (an emoji, say) is one character but two UTF-16 units.
+const charCount = Array.from(JOKE).length;
+
 // The entry has to be one line, so any line break or stray
 // control character means the text is not what we think it is.
 for (const ch of JOKE) {
@@ -25,9 +30,9 @@ for (const ch of JOKE) {
   if (code < 0x20 && ch !== "\t") fail("control character in joke");
   if (ch === "\n" || ch === "\r") fail("joke spans more than one line");
 }
-if (JOKE.length === 0) fail("joke is empty");
-if (JOKE.length > MAX_CHARS) {
-  fail(`joke is ${JOKE.length} characters, over the ${MAX_CHARS} limit`);
+if (charCount === 0) fail("joke is empty");
+if (charCount > MAX_CHARS) {
+  fail(`joke is ${charCount} characters, over the ${MAX_CHARS} limit`);
 }
 if (JOKE !== JOKE.trim()) fail("joke has leading or trailing whitespace");
 
@@ -50,5 +55,5 @@ if (back.length > 0 && back[back.length - 1] === 0x0a) {
 }
 
 console.log(
-  `wrote ${bytes.length} bytes (${JOKE.length} characters) to ${target}`,
+  `wrote ${bytes.length} bytes (${charCount} characters) to ${target}`,
 );
